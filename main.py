@@ -17,7 +17,10 @@ logging.basicConfig(
 
 if __name__ == '__main__':
     
-    application = ApplicationBuilder().token("").build()
+    token = ""
+    
+    application = ApplicationBuilder().token(token).build()
+    application.base_url = "https://api.telegram.org/bot" + token
     
     application.add_handler(CallbackQueryHandler(button))
     

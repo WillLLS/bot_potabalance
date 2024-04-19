@@ -5,11 +5,11 @@ from utils.utils import get_str_id, get_balance, update_balance, get_percent, ge
 
 
 @auth
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Hello!")
 
 @auth
-async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     
     user_id = str(update.effective_user.id)
     
@@ -28,7 +28,7 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @auth
 @check_args
 @chek_args_int
-async def spent(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def spent(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     
     value = int(context.args[0])
     user_id = str(update.effective_user.id)
@@ -40,7 +40,7 @@ async def spent(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @auth
 @check_args
 @chek_args_int
-async def sent(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def sent(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     user_id = str(update.effective_user.id)
     
     value = int(context.args[0])
@@ -63,7 +63,7 @@ async def sent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Choose a user on the one you sent money", reply_markup=reply_markup)
 
 @auth
-async def hist(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def hist(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     
     ids     = get_str_id()
     users   = get_name_id()
@@ -74,12 +74,15 @@ async def hist(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard.append([InlineKeyboardButton(users[id], callback_data=json.dumps(data))])
         
     reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Which user's historic do you want to see ?", reply_markup=reply_markup)
+    print(query==None)
+    if query == None:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Which user's historic do you want to see ?", reply_markup=reply_markup)
+    else:
+        await set_last_message(query=query, text="Which user's historic do you want to see ?", reply_markup=reply_markup)
 
 
 @auth
-async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None) -> None:
     query = update.callback_query
     
     await query.answer()
@@ -112,15 +115,28 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             [
                 InlineKeyboardButton(previous, callback_data=json.dumps(data_previous)), 
                 InlineKeyboardButton(next, callback_data=json.dumps(data_next))
+            ],
+            [
+                InlineKeyboardButton("←", callback_data=json.dumps({"back": "hist"}))
+            ],
+            [
+                InlineKeyboardButton("Quit", callback_data=json.dumps({"quit": "hist"}))
             ]
         ]
             
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await set_last_message(query=query, text=message, reply_markup=reply_markup)
+        
+    elif command == "back":
+        if data["back"] == "hist":
+            await hist(update, context, query)
+        
+    elif command == "quit":
+        await set_last_message(query=query, text="End of history")
 
 @auth
-async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     import time
     
     help_start      = "/start: Say hello :)"

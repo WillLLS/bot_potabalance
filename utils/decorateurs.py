@@ -6,14 +6,14 @@ import os
 
 
 def auth(function):
-    async def foo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def foo(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
         user_id = update.effective_user.id
         
         with open(path_authorization, "r", encoding="utf-8") as file:
             authorized_id = json.load(file)
         
         if user_id in authorized_id["auth"]:
-            await function(update, context)
+            await function(update, context, query)
         
         else:
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Not allowed!")
@@ -21,7 +21,7 @@ def auth(function):
     return foo
 
 def check_args(function):
-    async def foo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def foo(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
         if len(context.args) == 0:
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Argument needed!")
         else:
@@ -29,7 +29,7 @@ def check_args(function):
     return foo
 
 def chek_args_int(function):
-    async def foo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def foo(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
         try:
             int(context.args[0])
         except:
@@ -39,7 +39,7 @@ def chek_args_int(function):
     return foo
 
 def msg_checker(function):
-    async def foo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def foo(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
         if update.message.text == "Hello":
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Hello!")
         else:
